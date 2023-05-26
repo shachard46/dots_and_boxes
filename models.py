@@ -1,5 +1,6 @@
 import tkinter as tk
 from abc import ABC, abstractmethod
+from functools import reduce
 from tkinter import messagebox
 
 from typing import List
@@ -59,18 +60,24 @@ class Box(Shape):
         self.p2 = p2
         self.last_line = last_line
 
+    def get_side(self):
+        return self.last_line.color == 'red'
+
     def draw(self):
         self.canvas.create_rectangle(self.p1.x, self.p1.y, self.p1.x, self.p2.y, fill=self.last_line.color)
 
 
 class Board:
     def __init__(self, board_size, points_distance):
+
+        self.root = None
         self.canvas = None
         self.board_size = board_size
         self.points_distance = points_distance
         self.h_lines: List[List[Line]] = [[None] * (board_size - 1)] * board_size
         self.v_lines: List[List[Line]] = [[None] * board_size] * (board_size - 1)
         self.boxes: List[List[Box]] = [[None] * (board_size - 1)] * (board_size - 1)
+        self.init_canvas()
         self.points: List[Point] = []
         self.draw_points()
         self.current_player = 0
@@ -80,11 +87,12 @@ class Board:
         self.current_player = abs(self.current_player - 1)
 
     def init_canvas(self):
-        root = tk.Tk()
+        self.root = tk.Tk()
         root.title("Dots and Boxes")
         canvas_size = self.board_size * self.points_distance * 2
         self.canvas = tk.Canvas(root, width=canvas_size, height=canvas_size)
         self.canvas.pack()
+        root.mainloop()
 
     def draw_points(self):
         self.points = [
@@ -118,3 +126,22 @@ class Board:
                     self.boxes[i][j] = Box(self.h_lines[i][j].p1, self.h_lines[i + 1][j].p2, self.last_line,
                                            self.canvas)
                     self.boxes[i][j].draw()
+
+    def check_game_over(self):
+        if all(all(row) for row in self.boxes):
+            count_player1 = 0
+            count_player2 = 0
+            for box in reduce(lambda a, b: a + b, self.boxes):
+                count_player1 += 1 if box.get_side() else 0
+                count_player2 += 0 if box.get_side() else 1
+
+            if count_player1 > count_player2:
+                winner = "Player 1 wins!"
+            elif count_player2 > count_player1:
+                winner = "Player 2 wins!"
+            else:
+                winner = "It's a tie!"
+
+            # Show the winner in a message box
+            messagebox.showinfo("Game Over", winner)
+            self.root.quit()  # Close the window
