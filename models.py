@@ -38,12 +38,18 @@ class Point(Shape):
     def draw(self):
         self.canvas.create_oval(self.x - 4, self.y - 4, self.x + 4, self.y + 4, fill='black')
 
+    def __lt__(self, other):
+        if self.x == other.x:
+            return self.y < other.y
+        else:
+            return self.x < other.x
+
 
 class Line(Shape):
     def __init__(self, p1: Point, p2: Point, color: str, canvas: tk.Canvas):
         super().__init__(canvas)
-        self.p1 = p1
-        self.p2 = p2
+        self.p1 = p1 if p1 < p2 else p2
+        self.p2 = p1 if p1 > p2 else p2
         self.color = color
 
     def draw(self):
@@ -64,19 +70,19 @@ class Box(Shape):
         return self.last_line.color == 'red'
 
     def draw(self):
-        self.canvas.create_rectangle(self.p1.x, self.p1.y, self.p1.x, self.p2.y, fill=self.last_line.color)
+        self.canvas.create_rectangle(self.p1.x, self.p1.y, self.p2.x, self.p2.y, fill=self.last_line.color)
 
 
 class Board:
-    def __init__(self, board_size, points_distance):
-
+    def __init__(self, board_size, points_distance, offset):
         self.root = None
         self.canvas = None
         self.board_size = board_size
         self.points_distance = points_distance
-        self.h_lines: List[List[Line]] = [[None] * (board_size - 1)] * board_size
-        self.v_lines: List[List[Line]] = [[None] * board_size] * (board_size - 1)
-        self.boxes: List[List[Box]] = [[None] * (board_size - 1)] * (board_size - 1)
+        self.offset = offset
+        self.h_lines: List[List[Line]] = [[None] * (board_size - 1) for _ in range(board_size)]
+        self.v_lines: List[List[Line]] = [[None] * board_size for _ in range(board_size - 1)]
+        self.boxes: List[List[Box]] = [[None] * (board_size - 1) for _ in range(board_size - 1)]
         self.init_canvas()
         self.points: List[Point] = []
         self.draw_points()
@@ -88,15 +94,18 @@ class Board:
 
     def init_canvas(self):
         self.root = tk.Tk()
-        root.title("Dots and Boxes")
+        self.root.title("Dots and Boxes")
         canvas_size = self.board_size * self.points_distance * 2
-        self.canvas = tk.Canvas(root, width=canvas_size, height=canvas_size)
+        self.canvas = tk.Canvas(self.root, width=canvas_size, height=canvas_size)
         self.canvas.pack()
-        root.mainloop()
+
+    def start_game(self):
+        self.root.mainloop()
 
     def draw_points(self):
         self.points = [
-            [Point(x * self.points_distance, y * self.points_distance, self.canvas) for x in range(self.board_size)]
+            [Point(self.offset + x * self.points_distance, self.offset + y * self.points_distance, self.canvas) for x in
+             range(self.board_size)]
             for y in range(self.board_size)]
         for row in self.points:
             for point in row:
@@ -106,15 +115,19 @@ class Board:
         return 'red' if self.current_player else 'blue'
 
     def set_line(self, x1, y1, x2, y2):
-        line = Line(self.points[x1][y1], self.points[x2][y2], self.get_color(), self.canvas)
-        if x1 == x2:
-            if not self.h_lines[x1][y1]:
-                self.h_lines[x1][y1] = line
-        if y1 == y2:
-            if not self.v_lines[x1][y1]:
-                self.v_lines[x1][y1] = line
+        line = Line(self.points[y1][x1], self.points[y2][x2], self.get_color(), self.canvas)
+        if x1 == x2 and abs(y1 - y2) == 1:
+            if self.v_lines[min(y1, y2)][x1]:
+                return
+            self.v_lines[min(y1, y2)][x1] = line
+        elif y1 == y2 and abs(x2 - x1) == 1:
+            if self.h_lines[y1][min(x1, x2)]:
+                return
+            self.h_lines[y1][min(x1, x2)] = line
         else:
+            print('points are illegal')
             return
+        line.draw()
         self.last_line = line
         self.check_completed_boxes()
         self.switch_players()
