@@ -5,19 +5,11 @@ from tkinter import messagebox
 
 from typing import List
 
-# Game constants
-DOT_SIZE = 40  # Size of each dot on the grid
-GRID_SIZE = 6  # Number of dots in each row and column
-CANVAS_SIZE = (GRID_SIZE - 1) * DOT_SIZE  # Size of the canvas
+from pydantic import BaseModel
 
 # Player constants
 PLAYER1_COLOR = 'red'  # Color for Player 1
-PLAYER4_COLOR = 'blue'  # Color for Player 4
-
-# Game state variables
-current_player = 1
-lines_drawn = [[0] * GRID_SIZE for _ in range(GRID_SIZE)]
-boxes_owned = [[0] * (GRID_SIZE - 1) for _ in range(GRID_SIZE - 1)]
+PLAYER2_COLOR = 'blue'  # Color for Player 4
 
 
 class Shape(ABC):
@@ -56,7 +48,7 @@ class Line(Shape):
         self.canvas.create_line(self.p1.x, self.p1.y, self.p2.x, self.p2.y, fill=self.color)
 
     def get_side(self):
-        return self.color == 'red'
+        return self.color == PLAYER1_COLOR
 
 
 class Box(Shape):
@@ -67,15 +59,23 @@ class Box(Shape):
         self.last_line = last_line
 
     def get_side(self):
-        return self.last_line.color == 'red'
+        return self.last_line.color == PLAYER1_COLOR
 
     def draw(self):
         self.canvas.create_rectangle(self.p1.x, self.p1.y, self.p2.x, self.p2.y, fill=self.last_line.color)
 
 
+class GameState:
+    def __init__(self, points, horizontal_lines, vertical_lines, boxes):
+        self.points: List[List[Point]] = points
+        self.horizontal_lines: List[List[Line]] = horizontal_lines
+        self.vertical_lines: List[List[Line]] = vertical_lines
+        self.boxes: List[Box] = boxes
+
+
 class Board:
     def __init__(self, board_size, points_distance, offset):
-        self.root = None
+        self.root: tk.Tk = None
         self.canvas = None
         self.board_size = board_size
         self.points_distance = points_distance
@@ -112,7 +112,7 @@ class Board:
                 point.draw()
 
     def get_color(self):
-        return 'red' if self.current_player else 'blue'
+        return PLAYER1_COLOR if self.current_player else PLAYER2_COLOR
 
     def set_line(self, x1, y1, x2, y2):
         line = Line(self.points[y1][x1], self.points[y2][x2], self.get_color(), self.canvas)
@@ -158,3 +158,7 @@ class Board:
             # Show the winner in a message box
             messagebox.showinfo("Game Over", winner)
             self.root.quit()  # Close the window
+
+    def get_game_state(self) -> GameState:
+        return GameState(horizontal_lines=self.h_lines, vertical_lines=self.v_lines, points=self.points,
+                         boxes=self.boxes)

@@ -1,13 +1,33 @@
+import random
+from time import sleep
+
 from models import Board
+from player import Player
 
 BOARD_SIZE = 10
 POINT_DISTANCE = 30
 OFFSET = 100
 
-if __name__ == '__main__':
+player1 = Player(lambda state: (random.randint(0, 9), 4, random.randint(0, 9), 4))
+player2 = Player(lambda state: (random.randint(0, 9), 4, random.randint(0, 9), 4))
+
+
+def game_loop(board: Board):
+    running = True
+    while running:
+        board.set_line(*player1.action(board.get_game_state()))
+        sleep(0.5)
+        board.set_line(*player2.action(board.get_game_state()))
+        sleep(0.5)
+        board.root.update()
+    board.root.destroy()
+
+
+def main():
     board = Board(BOARD_SIZE, POINT_DISTANCE, OFFSET)
-    board.set_line(5, 3, 5, 4)  # 3, 5
-    board.set_line(4, 3, 4, 4)  # 3, 4
-    board.set_line(5, 4, 4, 4)  # 4, 4
-    board.set_line(5, 3, 4, 3)  # 3, 4
+    game_loop(board)
     board.start_game()
+
+
+if __name__ == '__main__':
+    main()
