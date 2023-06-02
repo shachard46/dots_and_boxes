@@ -2,7 +2,7 @@ import random
 from time import sleep
 
 from models import Board
-from player import Player
+from models.player import Player
 
 BOARD_SIZE = 10
 POINT_DISTANCE = 30
