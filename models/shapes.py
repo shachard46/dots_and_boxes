@@ -1,11 +1,5 @@
 import tkinter as tk
 from abc import ABC, abstractmethod
-from functools import reduce
-from tkinter import messagebox
-
-from typing import List
-
-from pydantic import BaseModel
 
 # Player constants
 PLAYER1_COLOR = 'red'  # Color for Player 1
@@ -63,4 +57,3 @@ class Box(Shape):
 
     def draw(self):
         self.canvas.create_rectangle(self.p1.x, self.p1.y, self.p2.x, self.p2.y, fill=self.last_line.color)
-

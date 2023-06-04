@@ -1,12 +1,14 @@
 import random
 from time import sleep
 
-from models import Board
+from models.board import Board
 from models.player import Player
 
 BOARD_SIZE = 10
 POINT_DISTANCE = 30
 OFFSET = 100
+
+
 
 player1 = Player(lambda state: (random.randint(0, 9), 4, random.randint(0, 9), 4))
 player2 = Player(lambda state: (random.randint(0, 9), 4, random.randint(0, 9), 4))
