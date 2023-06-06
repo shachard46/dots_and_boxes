@@ -97,12 +97,15 @@ class Board:
                 winner = "Player 1 wins!"
             elif count_player2 > count_player1:
                 winner = "Player 2 wins!"
+
             else:
                 winner = "It's a tie!"
 
             # Show the winner in a message box
             messagebox.showinfo("Game Over", winner)
             self._root.quit()  # Close the window
+            return False
+        return True
 
     def get_game_state(self) -> GameState:
         return GameState(lines=self.lines, points=self.points,

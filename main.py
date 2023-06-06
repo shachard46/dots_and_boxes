@@ -20,6 +20,7 @@ def game_loop(board: Board):
         board.set_line(*player2.action(board.get_game_state()))
         sleep(0.5)
         board.get_root().update()
+        running = board.check_game_over()
     board.get_root().destroy()
 
 
