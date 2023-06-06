@@ -7,7 +7,10 @@ class GameState:
     def __init__(self, points, lines, boxes):
         self.points: List[List[Point]] = points
         self.lines: List[List[List[Union[Line, None]]]] = lines
-        self.boxes: List[Box] = boxes
+        self.boxes: List[List[Box]] = boxes
+
+    def copy(self):
+        return GameState(self.points.copy(), self.lines.copy(), self.boxes.copy())
 
 
 class Player:

@@ -8,14 +8,16 @@ from models.shapes import Point, Line, Box, PLAYER1_COLOR, PLAYER2_COLOR
 
 
 class Board:
-    def __init__(self, board_size, points_distance, offset, player1: Player, player2: Player):
+    def __init__(self, board_size, points_distance, x_offset, y_offset, point_size, player1: Player, player2: Player):
         self.player1 = player1
         self.player2 = player2
         self._root: tk.Tk = None
         self._canvas = None
         self.board_size = board_size
         self._points_distance = points_distance
-        self._offset = offset
+        self.point_size = point_size
+        self._x_offset = x_offset
+        self._y_offset = y_offset
         self.lines: List[List[List[Union[Line, None]]]] = [[[None, None] for column in range(board_size)] for row in
                                                            range(board_size)]
         self.boxes: List[List[Box]] = [[None] * (board_size - 1) for _ in range(board_size - 1)]
@@ -43,7 +45,8 @@ class Board:
 
     def _draw_points(self):
         self.points = [
-            [Point(self._offset + x * self._points_distance, self._offset + y * self._points_distance, self._canvas) for
+            [Point(self._x_offset + x * self._points_distance, self._y_offset + y * self._points_distance, self._canvas,
+                   self.point_size) for
              x in
              range(self.board_size)]
             for y in range(self.board_size)]
@@ -62,6 +65,7 @@ class Board:
         elif y1 == y2 and abs(x2 - x1) == 1:
             pos = 0
         else:
+            self._switch_players()
             print('points are illegal')
             return
         if self.lines[min(y1, y2)][min(x1, x2)][pos]:

@@ -18,19 +18,24 @@ class Shape(ABC):
 
 
 class Point(Shape):
-    def __init__(self, x: int, y: int, canvas: tk.Canvas) -> None:
+    def __init__(self, x: int, y: int, canvas: tk.Canvas, point_size) -> None:
         super().__init__(canvas)
         self.x = x
         self.y = y
+        self.point_size = point_size
 
     def draw(self):
-        self.canvas.create_oval(self.x - 4, self.y - 4, self.x + 4, self.y + 4, fill='black')
+        self.canvas.create_oval(self.x - self.point_size, self.y - self.point_size, self.x + self.point_size,
+                                self.y + self.point_size, fill='black')
 
     def __lt__(self, other):
         if self.x == other.x:
             return self.y < other.y
         else:
             return self.x < other.x
+
+    def copy(self) -> 'Point':
+        return Point(self.x, self.y)
 
 
 class Line(Shape):
@@ -41,10 +46,13 @@ class Line(Shape):
         self.color = color
 
     def draw(self):
-        self.canvas.create_line(self.p1.x, self.p1.y, self.p2.x, self.p2.y, fill=self.color)
+        self.canvas.create_line(self.p1.x, self.p1.y, self.p2.x, self.p2.y, fill=self.color, width=3)
 
     def get_side(self):
         return self.color == PLAYER1_COLOR
+
+    def copy(self) -> 'Line':
+        return Line(self.p1.copy(), self.p2.copy(), self.color, self.canvas)
 
 
 class Box(Shape):
@@ -59,3 +67,6 @@ class Box(Shape):
 
     def draw(self):
         self.canvas.create_rectangle(self.p1.x, self.p1.y, self.p2.x, self.p2.y, fill=self.last_line.color)
+
+    def copy(self) -> 'Box':
+        return Box(self.p1.copy(), self.p2.copy(), self.last_line.copy(), self.canvas)
