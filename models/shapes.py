@@ -48,8 +48,8 @@ class Line(Shape):
     def draw(self):
         self.canvas.create_line(self.p1.x, self.p1.y, self.p2.x, self.p2.y, fill=self.color, width=3)
 
-    def get_side(self):
-        return self.color == PLAYER1_COLOR
+    def get_side(self, player_color):
+        return self.color == player_color
 
     def copy(self) -> 'Line':
         return Line(self.p1.copy(), self.p2.copy(), self.color, self.canvas)
