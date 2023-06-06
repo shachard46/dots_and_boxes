@@ -3,15 +3,8 @@ from tkinter import messagebox
 from typing import List, Union
 import tkinter as tk
 
-from models.player import Player
+from models.player import Player, GameState
 from models.shapes import Point, Line, Box, PLAYER1_COLOR, PLAYER2_COLOR
-
-
-class GameState:
-    def __init__(self, points, lines, boxes):
-        self.points: List[List[Point]] = points
-        self.lines: List[List[List[Union[Line, None]]]] = lines
-        self.boxes: List[Box] = boxes
 
 
 class Board:
@@ -36,7 +29,7 @@ class Board:
         return self._root
 
     def _switch_players(self):
-        self.current_player = self.player1 if self.player1 else self.player2
+        self.current_player = self.player2 if self.current_player == self.player1 else self.player1
 
     def _init_canvas(self):
         self._root = tk.Tk()
@@ -62,7 +55,7 @@ class Board:
         return self.current_player.color
 
     def set_line(self, x1, y1, x2, y2):
-        if y1 > self.board_size or y2 > self.board_size or x1 > self.board_size or x2 > self.board_size:
+        if y1 >= self.board_size or y2 >= self.board_size or x1 >= self.board_size or x2 >= self.board_size:
             return
         if x1 == x2 and abs(y1 - y2) == 1:
             pos = 1
@@ -100,9 +93,9 @@ class Board:
                 count_player2 += 1 if box.get_side(self.player2.color) else 0
 
             if count_player1 > count_player2:
-                winner = "Player 1 wins!"
+                winner = f"{self.player1.name} wins!"
             elif count_player2 > count_player1:
-                winner = "Player 2 wins!"
+                winner = f"{self.player2.name} wins!"
 
             else:
                 winner = "It's a tie!"

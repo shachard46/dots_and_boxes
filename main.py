@@ -3,20 +3,21 @@ from time import sleep
 
 from models.board import Board
 from models.player import Player
+from players.player_yaara import SmartPlayer
 
 BOARD_SIZE = 10
 POINT_DISTANCE = 30
 OFFSET = 100
 
-player1 = Player('yaara', 'red')
-player2 = Player('shachar', 'green')
+player1 = SmartPlayer('yaara', 'red')
+player2 = SmartPlayer('shachar', 'green')
 
 
 def game_loop(board: Board):
     running = True
     while running:
         board.set_line(*board.current_player.action(board.get_game_state()))
-        sleep(0.5)
+        sleep(0.1)
         board.get_root().update()
         running = board.check_game_over()
     board.get_root().destroy()
