@@ -1,7 +1,7 @@
 from typing import Tuple, List, Union
 
-from models.player import GameState
-from models.shapes import Point, Line, Box
+from game_blocks.game_state import GameState
+from game_blocks.shapes import Point, Line, Box
 
 
 class AdvancedPlayer:

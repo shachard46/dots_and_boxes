@@ -3,8 +3,9 @@ from tkinter import messagebox
 from typing import List, Union
 import tkinter as tk
 
-from models.player import Player, GameState
-from models.shapes import Point, Line, Box, PLAYER1_COLOR, PLAYER2_COLOR
+from game_blocks.player import Player
+from game_blocks.game_state import GameState
+from game_blocks.shapes import Point, Line, Box, PLAYER1_COLOR, PLAYER2_COLOR
 
 
 class Board:
@@ -57,18 +58,28 @@ class Board:
     def get_color(self):
         return self.current_player.color
 
+    def is_points_on_board(self, x1, y1, x2, y2):
+        if y1 >= self.board_size or y2 >= self.board_size or x1 >= self.board_size or x2 >= self.board_size \
+                or y1 < 0 or y2 < 0 or x1 < 0 or x2 < 0:
+            return False
+        return True
+
     def set_line(self, x1, y1, x2, y2):
-        if y1 >= self.board_size or y2 >= self.board_size or x1 >= self.board_size or x2 >= self.board_size:
+        if not self.is_points_on_board(x1, y1, x2, y2):
+            print(f'{self.current_player.name} - Points are out of board')
+            self._switch_players()
             return
         if x1 == x2 and abs(y1 - y2) == 1:
             pos = 1
         elif y1 == y2 and abs(x2 - x1) == 1:
             pos = 0
         else:
+            print(f'{self.current_player.name} - Points are illegal.')
             self._switch_players()
-            print('points are illegal')
             return
         if self.lines[min(y1, y2)][min(x1, x2)][pos]:
+            print(f'{self.current_player.name} - The line is already picked.')
+            self._switch_players()
             return
         line = Line(self.points[y1][x1], self.points[y2][x2], self.get_color(), self._canvas)
         self.lines[min(y1, y2)][min(x1, x2)][pos] = line
