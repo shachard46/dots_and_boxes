@@ -162,6 +162,3 @@ class Board:
     def get_game_state(self) -> GameState:
         return GameState(lines=self.lines, points=self.points,
                          boxes=self.boxes)
-
--
-|
