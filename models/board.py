@@ -1,15 +1,14 @@
 from functools import reduce
 from tkinter import messagebox
-from typing import List
+from typing import List, Union
 import tkinter as tk
 from models.shapes import Point, Line, Box, PLAYER1_COLOR, PLAYER2_COLOR
 
 
 class GameState:
-    def __init__(self, points, horizontal_lines, vertical_lines, boxes):
+    def __init__(self, points, lines, boxes):
         self.points: List[List[Point]] = points
-        self.horizontal_lines: List[List[Line]] = horizontal_lines
-        self.vertical_lines: List[List[Line]] = vertical_lines
+        self.lines: List[List[List[Union[Line, None]]]] = lines
         self.boxes: List[Box] = boxes
 
 
@@ -21,8 +20,8 @@ class Board:
         self.board_size = board_size
         self._points_distance = points_distance
         self._offset = offset
-        self.h_lines: List[List[Line]] = [[None] * (board_size - 1) for _ in range(board_size)]
-        self.v_lines: List[List[Line]] = [[None] * board_size for _ in range(board_size - 1)]
+        self.lines: List[List[List[Union[Line, None]]]] = [[[None, None] for column in range(board_size)] for row in
+                                                           range(board_size)]
         self.boxes: List[List[Box]] = [[None] * (board_size - 1) for _ in range(board_size - 1)]
         self._init_canvas()
         self.points: List[Point] = []
@@ -60,18 +59,19 @@ class Board:
         return self.colors[0] if self.current_player else self.colors[1]
 
     def set_line(self, x1, y1, x2, y2):
-        line = Line(self.points[y1][x1], self.points[y2][x2], self.get_color(), self._canvas)
+        if y1 > self.board_size or y2 > self.board_size or x1 > self.board_size or x2 > self.board_size:
+            return
         if x1 == x2 and abs(y1 - y2) == 1:
-            if self.v_lines[min(y1, y2)][x1]:
-                return
-            self.v_lines[min(y1, y2)][x1] = line
+            pos = 1
         elif y1 == y2 and abs(x2 - x1) == 1:
-            if self.h_lines[y1][min(x1, x2)]:
-                return
-            self.h_lines[y1][min(x1, x2)] = line
+            pos = 0
         else:
             print('points are illegal')
             return
+        if self.lines[min(y1, y2)][min(x1, x2)][pos]:
+            return
+        line = Line(self.points[y1][x1], self.points[y2][x2], self.get_color(), self._canvas)
+        self.lines[min(y1, y2)][min(x1, x2)][pos] = line
         line.draw()
         self.last_line = line
         self.check_completed_boxes()
@@ -105,5 +105,5 @@ class Board:
             self._root.quit()  # Close the window
 
     def get_game_state(self) -> GameState:
-        return GameState(horizontal_lines=self.h_lines, vertical_lines=self.v_lines, points=self.points,
+        return GameState(lines=self.lines, points=self.points,
                          boxes=self.boxes)
