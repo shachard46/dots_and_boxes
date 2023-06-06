@@ -2,6 +2,8 @@ import tkinter as tk
 from abc import ABC, abstractmethod
 
 # Player constants
+from typing import List
+
 PLAYER1_COLOR = 'red'  # Color for Player 1
 PLAYER2_COLOR = 'blue'  # Color for Player 4
 
@@ -52,8 +54,8 @@ class Box(Shape):
         self.p2 = p2
         self.last_line = last_line
 
-    def get_side(self):
-        return self.last_line.color == PLAYER1_COLOR
+    def get_side(self, player_color):
+        return self.last_line.color == player_color
 
     def draw(self):
         self.canvas.create_rectangle(self.p1.x, self.p1.y, self.p2.x, self.p2.y, fill=self.last_line.color)

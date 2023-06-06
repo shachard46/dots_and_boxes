@@ -2,6 +2,8 @@ from functools import reduce
 from tkinter import messagebox
 from typing import List, Union
 import tkinter as tk
+
+from models.player import Player
 from models.shapes import Point, Line, Box, PLAYER1_COLOR, PLAYER2_COLOR
 
 
@@ -13,8 +15,9 @@ class GameState:
 
 
 class Board:
-    def __init__(self, board_size, points_distance, offset, colors: List[str]):
-        self.colors = colors
+    def __init__(self, board_size, points_distance, offset, player1: Player, player2: Player):
+        self.player1 = player1
+        self.player2 = player2
         self._root: tk.Tk = None
         self._canvas = None
         self.board_size = board_size
@@ -26,14 +29,14 @@ class Board:
         self._init_canvas()
         self.points: List[Point] = []
         self._draw_points()
-        self.current_player = 0
+        self.current_player = player1
         self.last_line: Line = None
 
     def get_root(self):
         return self._root
 
     def _switch_players(self):
-        self.current_player = abs(self.current_player - 1)
+        self.current_player = self.player1 if self.player1 else self.player2
 
     def _init_canvas(self):
         self._root = tk.Tk()
@@ -56,7 +59,7 @@ class Board:
                 point.draw()
 
     def get_color(self):
-        return self.colors[0] if self.current_player else self.colors[1]
+        return self.current_player.color
 
     def set_line(self, x1, y1, x2, y2):
         if y1 > self.board_size or y2 > self.board_size or x1 > self.board_size or x2 > self.board_size:
@@ -80,8 +83,10 @@ class Board:
     def check_completed_boxes(self):
         for i in range(self.board_size - 1):
             for j in range(self.board_size - 1):
-                if self.h_lines[i][j] and self.h_lines[i + 1][j] and self.v_lines[i][j] and self.v_lines[i][j + 1]:
-                    self.boxes[i][j] = Box(self.h_lines[i][j].p1, self.h_lines[i + 1][j].p2, self.last_line,
+                if self.lines[i][j][0] and self.lines[i][j][1] and self.lines[i + 1][j][0] and self.lines[i][j + 1][1]:
+                    if self.boxes[i][j]:
+                        continue
+                    self.boxes[i][j] = Box(self.lines[i][j][0].p1, self.lines[i + 1][j][0].p2, self.last_line,
                                            self._canvas)
                     self.boxes[i][j].draw()
 
@@ -90,8 +95,8 @@ class Board:
             count_player1 = 0
             count_player2 = 0
             for box in reduce(lambda a, b: a + b, self.boxes):
-                count_player1 += 1 if box.get_side() else 0
-                count_player2 += 0 if box.get_side() else 1
+                count_player1 += 1 if box.get_side(self.player1.color) else 0
+                count_player2 += 1 if box.get_side(self.player2.color) else 0
 
             if count_player1 > count_player2:
                 winner = "Player 1 wins!"

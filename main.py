@@ -25,7 +25,7 @@ def game_loop(board: Board):
 
 
 def main():
-    board = Board(BOARD_SIZE, POINT_DISTANCE, OFFSET, [player1.color, player2.color])
+    board = Board(BOARD_SIZE, POINT_DISTANCE, OFFSET, player1, player2)
     game_loop(board)
     board.start_game()
 
