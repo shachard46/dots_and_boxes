@@ -89,6 +89,7 @@ class Board:
                     self.boxes[i][j] = Box(self.lines[i][j][0].p1, self.lines[i + 1][j][0].p2, self.last_line,
                                            self._canvas)
                     self.boxes[i][j].draw()
+                    self._switch_players()
 
     def check_game_over(self):
         if all(all(row) for row in self.boxes):

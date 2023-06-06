@@ -15,9 +15,7 @@ player2 = Player('shachar', 'green')
 def game_loop(board: Board):
     running = True
     while running:
-        board.set_line(*player1.action(board.get_game_state()))
-        sleep(0.5)
-        board.set_line(*player2.action(board.get_game_state()))
+        board.set_line(*board.current_player.action(board.get_game_state()))
         sleep(0.5)
         board.get_root().update()
         running = board.check_game_over()
